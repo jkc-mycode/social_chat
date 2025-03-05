@@ -17,8 +17,8 @@ datasource db {
 model User {
   id        Int      @id @default(autoincrement())
   email     String   @unique
-  name      String?
-  password  String
+  name      String
+  password  String   @db.Text
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @updatedAt @map("updated_at")
   Chat      Chat[]
@@ -28,7 +28,7 @@ model User {
 
 model Chat {
   id        Int      @id @default(autoincrement())
-  message   String
+  message   String   @db.Text
   userId    Int      @map("user_id")
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @updatedAt @map("updated_at")

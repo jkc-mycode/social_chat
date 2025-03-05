@@ -2,15 +2,15 @@
   "name": "gamespringchat",
   "version": "1.0.0",
   "description": "게임스프링 과제용 소셜 채팅",
-  "main": "index.js",
+  "main": "app.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "dev": "nodemon --watch ./ ./src/index.ts"
+    "dev": "nodemon --watch ./src --exec vite-node src/app.ts"
   },
   "keywords": [],
-  "author": "",
-  "license": "ISC",
-  "type": "commonjs",
+  "author": "kimjeongchan",
+  "license": "MIT",
+  "type": "module",
   "dependencies": {
     "@prisma/client": "^6.4.1",
     "bcrypt": "^5.1.1",
@@ -35,6 +35,8 @@
     "@types/socket.io": "^3.0.1",
     "nodemon": "^3.1.9",
     "ts-node": "^10.9.2",
-    "typescript": "^5.8.2"
+    "typescript": "^5.8.2",
+    "vite": "^6.2.0",
+    "vite-node": "^3.0.7"
   }
 }
