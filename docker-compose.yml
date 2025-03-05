@@ -1,0 +1,35 @@
+version: '3'
+
+services:
+  mysql:
+    image: mysql:8.0
+    container_name: mysql_db
+    environment:
+      - MYSQL_ROOT_PASSWORD=${MYSQL_ROOT_PASSWORD}
+      - MYSQL_DATABASE=${MYSQL_DATABASE}
+    ports:
+      - '3307:3306'
+    volumes:
+      - mysql_data:/var/lib/mysql
+
+  app:
+    build: .
+    container_name: express_app
+    ports:
+      - '3000:3000'
+    depends_on:
+      - mysql
+    environment:
+      - DB_HOST=mysql
+      - DB_PORT=3306
+      - DB_USER=${MYSQL_USER}
+      - DB_PASSWORD=${MYSQL_ROOT_PASSWORD}
+      - DB_DATABASE=${MYSQL_DATABASE}
+      - DATABASE_URL=${DATABASE_URL}
+      - PORT=${PORT}
+      - SESSION_SECRET=${SESSION_SECRET}
+      - ACCESS_TOKEN_KEY=${ACCESS_TOKEN_KEY}
+      - REFRESH_TOKEN_KEY=${REFRESH_TOKEN_KEY}
+
+volumes:
+  mysql_data:
