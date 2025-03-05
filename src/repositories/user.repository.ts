@@ -14,6 +14,7 @@ export class UserRepository {
     name: string
   ): Promise<User> => {
     try {
+      // 유저 생성
       const user = await this.prisma.user.create({
         data: {
           email,
@@ -45,17 +46,18 @@ export class UserRepository {
     }
   };
 
-  // 로그인
-  signIn = async (email: string, password: string) => {
+  // 사용자 ID로 사용자 조회
+  getUserById = async (id: number): Promise<User | null> => {
     try {
-    } catch (err: any) {
-      throw new CustomError(err.message, err.statusCode);
-    }
-  };
+      const user = await this.prisma.user.findUnique({
+        where: { id },
+      });
 
-  // 로그아웃
-  signOut = async () => {
-    try {
+      if (!user) {
+        return null;
+      }
+
+      return user;
     } catch (err: any) {
       throw new CustomError(err.message, err.statusCode);
     }

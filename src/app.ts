@@ -1,17 +1,20 @@
 import express, { Request, Response } from 'express';
 import dotenv from 'dotenv';
-dotenv.config();
+dotenv.config(); // 환경 변수 설정
 import expressSession from 'express-session';
-import { prisma } from './utils/prisma';
 import router from './routes/index';
 import errorHandlerMiddleware from './middlewares/error-handler.middleware';
+import passport from './passport/local-strategy.passport';
+import jwtAuth from './middlewares/sign-in-check.middleware';
 
 const app = express();
 const PORT = process.env.PORT;
 const SESSION_SECRET = process.env.SESSION_SECRET || 'secret';
 
+// JSON 및 url 데이터 파싱 미들웨어
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
+// 세션 설정 미들웨어 (passport에서도 사용)
 app.use(
   expressSession({
     secret: SESSION_SECRET,
@@ -21,8 +24,13 @@ app.use(
   })
 );
 
+// passport 초기화 및 세션 설정
+app.use(passport.initialize());
+app.use(passport.session());
+
 // 기본 서버 체크
-app.get('/', (req: Request, res: Response) => {
+app.get('/test', jwtAuth, (req: Request, res: Response) => {
+  console.log(req.user);
   res.send('Hello World!');
 });
 

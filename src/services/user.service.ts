@@ -1,7 +1,6 @@
 import { UserRepository } from '../repositories/user.repository';
 import { User } from '@prisma/client';
 import bcrypt from 'bcrypt';
-import jwt from 'jsonwebtoken';
 import { CustomError } from '../errors/http.error';
 
 export class UserService {
@@ -37,44 +36,6 @@ export class UserService {
       user.password = '';
 
       return user;
-    } catch (err: any) {
-      throw new CustomError(err.message, err.statusCode);
-    }
-  };
-
-  // 로그인
-  signIn = async (email: string, password: string): Promise<string> => {
-    try {
-      // 사용자 조회
-      const user = await this.userRepository.getUserByEmail(email);
-      if (!user) {
-        throw new CustomError('사용자를 찾을 수 없습니다.', 404);
-      }
-
-      // 비밀번호 비교
-      const isMatch = await bcrypt.compare(password, user.password);
-      if (!isMatch) {
-        throw new CustomError('비밀번호가 일치하지 않습니다.', 401);
-      }
-
-      // JWT 토큰 발급
-      const accessToken = jwt.sign(
-        { id: user.id },
-        process.env.ACCESS_TOKEN_KEY as string,
-        {
-          expiresIn: '6h',
-        }
-      );
-
-      return accessToken;
-    } catch (err: any) {
-      throw new CustomError(err.message, err.statusCode);
-    }
-  };
-
-  // 로그아웃
-  signOut = async () => {
-    try {
     } catch (err: any) {
       throw new CustomError(err.message, err.statusCode);
     }

@@ -1,4 +1,5 @@
 import express from 'express';
+import passport from 'passport';
 import { prisma } from '../utils/prisma';
 import { UserRepository } from '../repositories/user.repository';
 import { UserService } from '../services/user.service';
@@ -14,9 +15,9 @@ const userController = new UserController(userService);
 router.post('/sign-up', userController.signUp);
 
 // 로그인 API
-router.post('/sign-in', userController.signIn);
+router.post('/sign-in', passport.authenticate('local'), userController.signIn);
 
 // 로그아웃 API
-router.post('/sign-out', userController.signOut);
+// router.post('/sign-out', userController.signOut);
 
 export default router;
