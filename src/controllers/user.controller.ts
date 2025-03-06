@@ -1,7 +1,5 @@
-import { Request, Response, NextFunction, RequestHandler } from 'express';
+import { RequestHandler } from 'express';
 import { UserService } from '../services/user.service';
-import jwt from 'jsonwebtoken';
-import { User } from '@prisma/client';
 
 export class UserController {
   private userService: UserService;
@@ -17,10 +15,8 @@ export class UserController {
       // 서비스 로직을 통해 사용자 생성
       const user = await this.userService.signUp(email, password, name);
 
-      res.status(201).json({
-        message: '회원 가입 성공',
-        data: { user },
-      });
+      // 회원가입 성공 후 로그인 페이지로 리다이렉션
+      res.redirect('/user/sign-in');
     } catch (err: any) {
       next(err);
     }
@@ -29,21 +25,21 @@ export class UserController {
   // 로그인
   signIn: RequestHandler = async (req, res, next) => {
     try {
-      // request에 있는 user 가져옴
-      const user: User = req.user as User;
+      // 로그인 성공 후 메인 페이지로 리다이렉션
+      res.redirect('/chat');
+    } catch (err: any) {
+      next(err);
+    }
+  };
 
-      // JWT 토큰 발급
-      const accessToken = jwt.sign(
-        { id: user.id },
-        process.env.ACCESS_TOKEN_KEY as string,
-        {
-          expiresIn: '2h', // 토큰 만료 시간 설정
+  // 로그아웃
+  signOut: RequestHandler = async (req, res, next) => {
+    try {
+      req.session.destroy((err) => {
+        if (err) {
+          return next(err);
         }
-      );
-
-      res.status(200).json({
-        message: '로그인 성공',
-        data: { accessToken },
+        res.send('로그아웃되었습니다.');
       });
     } catch (err: any) {
       next(err);

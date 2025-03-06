@@ -52,6 +52,8 @@ passport.deserializeUser(
       if (!user) {
         return done(null, false);
       }
+      // 비밀번호는 제외하고 req.user에 저장
+      user.password = '';
       done(null, user);
     } catch (err: any) {
       done(err);
