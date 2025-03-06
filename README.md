@@ -40,7 +40,7 @@ docker-compose up --build
 ```
 
 2. 애플리케이션 접속:
-- 웹 브라우저에서 `http://localhost:3000` 접속
+- 웹 브라우저에서 `http://localhost:3000/user/sign-in` 접속
 
 ### 3. 로컬 개발 환경 설정 (선택사항)
 1. 의존성 설치:
@@ -85,6 +85,18 @@ npm run dev
   1. Docker 컨테이너가 모두 실행 중인지 확인
   2. `.env` 파일의 DATABASE_URL이 올바르게 설정되었는지 확인
   3. Docker 컨테이너 재시작: `docker-compose down && docker-compose up`
+
+## 데이터베이스 설정
+1. 데이터베이스 복원 (선택사항)
+   ```bash
+   # Docker 컨테이너가 실행 중인 상태에서
+   cat backup.sql | docker exec -i mysql_db mysql -u root -p123123 social_chat
+   ```
+
+2. 또는 Prisma 마이그레이션 실행
+   ```bash
+   npx prisma migrate deploy
+   ```
 
 ## 라이선스
 MIT License 
