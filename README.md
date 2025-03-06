@@ -48,17 +48,22 @@ docker-compose up --build
 npm install
 ```
 
-2. Prisma 클라이언트 생성:
+2. .env에서 DATABASE_URL 수정
+```
+mysql:3306 => localhost:3306
+```
+
+3. Prisma 클라이언트 생성:
 ```bash
 npx prisma generate
 ```
 
-3. 데이터베이스 마이그레이션:
+4. 데이터베이스 마이그레이션:
 ```bash
 npx prisma migrate dev
 ```
 
-4. 개발 서버 실행:
+5. 개발 서버 실행:
 ```bash
 npm run dev
 ```
@@ -93,10 +98,6 @@ npm run dev
    cat backup.sql | docker exec -i mysql_db mysql -u root -p123123 social_chat
    ```
 
-2. 또는 Prisma 마이그레이션 실행
-   ```bash
-   npx prisma migrate deploy
-   ```
 
 ## 라이선스
 MIT License 
