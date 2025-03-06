@@ -1,6 +1,6 @@
 import { UserRepository } from '../repositories/user.repository';
 import { User } from '@prisma/client';
-import bcrypt from 'bcrypt';
+import bcrypt from 'bcryptjs';
 import { CustomError } from '../errors/http.error';
 
 export class UserService {

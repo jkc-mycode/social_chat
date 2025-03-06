@@ -3,7 +3,7 @@ import { Strategy as LocalStrategy } from 'passport-local';
 import { prisma } from '../utils/prisma';
 import { UserRepository } from '../repositories/user.repository';
 import { User } from '@prisma/client';
-import bcrypt from 'bcrypt';
+import bcrypt from 'bcryptjs';
 import { CustomError } from '../errors/http.error';
 
 const userRepository = new UserRepository(prisma);

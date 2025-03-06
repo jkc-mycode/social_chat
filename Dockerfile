@@ -10,6 +10,9 @@ RUN npm install
 # 소스코드 복사
 COPY . .
 
+# Prisma 설정
+RUN npx prisma generate
+
 EXPOSE 3000
 
 CMD ["npm", "run", "dev"]
