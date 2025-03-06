@@ -13,7 +13,7 @@ export class UserController {
       const { email, password, name } = req.body;
 
       // 서비스 로직을 통해 사용자 생성
-      const user = await this.userService.signUp(email, password, name);
+      await this.userService.signUp(email, password, name);
 
       // 회원가입 성공 후 로그인 페이지로 리다이렉션
       res.redirect('/user/sign-in');

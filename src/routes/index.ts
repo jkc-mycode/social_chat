@@ -1,13 +1,10 @@
 import express from 'express';
 import userRouter from './user.router';
-import isSignIn from '../middlewares/sign-in-check.middleware';
+import chatRouter from './chat.router';
 
 const router = express.Router();
 
 router.use('/user', userRouter);
-router.get('/chat', isSignIn(true), (req, res) => {
-  res.render('multi-chat');
-});
-// router.use('/chat');
+router.use('/chat', chatRouter);
 
 export default router;

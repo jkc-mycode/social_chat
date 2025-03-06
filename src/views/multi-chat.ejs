@@ -6,6 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Multi-Chat</title>
     <link rel="stylesheet" href="/styles.css">
+    <script src="/socket.io/socket.io.js"></script>
 </head>
 
 <body>
@@ -21,7 +22,7 @@
             </div>
             <div class="message-input">
                 <input type="text" id="message" placeholder="Type your message here...">
-                <button onclick="sendMessage()">Send</button>
+                <button>Send</button>
             </div>
         </div>
         <div class="user-list">
@@ -33,20 +34,6 @@
     </div>
 
     <script>
-        function sendMessage() {
-            const messageInput = document.getElementById('message');
-            const messagesContainer = document.getElementById('messages');
-            const message = messageInput.value.trim();
-
-            if (message) {
-                const messageElement = document.createElement('div');
-                messageElement.textContent = message;
-                messagesContainer.appendChild(messageElement);
-                messageInput.value = '';
-                messagesContainer.scrollTop = messagesContainer.scrollHeight;
-            }
-        }
-
         function logout() {
             fetch('/user/sign-out', {
                 method: 'POST',
@@ -64,6 +51,33 @@
                 alert('로그아웃 실패!');
             });
         }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            const socket = io('/chat');
+
+            socket.on('connect', () => {
+                console.log('Connected to chat namespace');
+            });
+
+            socket.on('disconnect', () => {
+                console.log('Disconnected from chat namespace');
+            });
+
+            socket.on('newMessage', (message) => {
+                const message = document.getElementById('message');
+                const messageElement = document.createElement('div');
+                messageElement.textContent = message;
+                messages.appendChild(messageElement);
+            });
+
+            const sendButton = document.getElementById('sendButton');
+            sendButton.addEventListener('click', () => {
+                const messageInput = document.getElementById('message');
+                const message = messageInput.value;
+                socket.emit('sendMessage', message);
+                messageInput.value = '';
+            });
+        });
     </script>
 </body>
 

@@ -6,7 +6,7 @@ import expressSession from 'express-session';
 import router from './routes/index';
 import errorHandlerMiddleware from './middlewares/error-handler.middleware';
 import passport from './passport/local-strategy.passport';
-import isSignIn from './middlewares/sign-in-check.middleware';
+import socket from './socket';
 
 const app = express();
 const PORT = process.env.PORT;
@@ -23,14 +23,13 @@ app.use(express.static(path.join(__dirname, 'public')));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 // 세션 설정 미들웨어 (passport에서 사용)
-app.use(
-  expressSession({
-    secret: SESSION_SECRET,
-    resave: false,
-    saveUninitialized: false,
-    cookie: { secure: false, httpOnly: true },
-  })
-);
+const sessionMiddleware = expressSession({
+  secret: SESSION_SECRET,
+  resave: false,
+  saveUninitialized: false,
+  cookie: { secure: false, httpOnly: true },
+});
+app.use(sessionMiddleware);
 
 // passport 초기화 및 세션 설정
 app.use(passport.initialize());
@@ -55,6 +54,8 @@ app.use((err: any, req: Request, res: Response, next: express.NextFunction) => {
   errorHandlerMiddleware(err, req, res, next);
 });
 
-app.listen(PORT, () => {
+const server = app.listen(PORT, () => {
   console.log('서버 실행 중....');
 });
+
+socket(server, app, sessionMiddleware);
