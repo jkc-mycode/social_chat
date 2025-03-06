@@ -4,7 +4,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Private-Chat</title>
+    <title>Private Chat with <%= targetUser.name %>
+    </title>
     <link rel="stylesheet" href="/styles.css">
     <script src="/socket.io/socket.io.js"></script>
 </head>
@@ -15,25 +16,26 @@
         <a href="/chat/users"><button>Users</button></a>
         <a href="#"><button onclick="logout()">Logout</button></a>
     </div>
-    <div class="chat-container">
-        <div class="message-and-input">
-            <div class="messages" id="messages">
-                <!-- 메시지들 출력될 곳 -->
+    <div class="chat-content">
+        <h2 class="chat-title">
+            <%= targetUser.name %>님과의 대화
+        </h2>
+        <div class="chat-container">
+            <div class="message-and-input">
+                <div class="messages" id="messages">
+                    <!-- 메시지들 출력될 곳 -->
+                </div>
+                <div class="message-input">
+                    <input type="text" id="message" placeholder="메시지를 입력해 주세요.">
+                    <button id="sendButton">Send</button>
+                </div>
             </div>
-            <div class="message-input">
-                <input type="text" id="message" placeholder="메시지를 입력해 주세요.">
-                <button id="sendButton">Send</button>
-            </div>
-        </div>
-        <div class="user-list">
-            <h3 id="user-list-count">현재: 0명</h3>
-            <ul id="users">
-                <!-- 사용자 리스트 출력될 곳 -->
-            </ul>
         </div>
     </div>
 
     <script>
+        const targetUserId = '<%= targetUser.id %>';
+
         // 로그아웃 버튼 클릭 시
         function logout() {
             fetch('/user/sign-out', {
@@ -59,25 +61,26 @@
 
             socket.on('connect', () => {
                 console.log('Chat 네임스페이스 접속 완료');
-                socket.emit('joinPage', 'public');
-                socket.emit('requestUserList');
+                console.log(targetUserId);
+                socket.emit('joinPage', 'private');
+                // private 메시지 목록 요청
+                socket.emit('requestMessages', { type: 'private', targetId: +targetUserId });
             });
 
             socket.on('disconnect', () => {
                 console.log('Chat 네임스페이스 접속 해제');
             });
 
-            socket.on('connect_error', (error) => {
-                console.error('연결 에러:', error);
-            });
-
             socket.on('existingMessages', (messages) => {
+                console.log(messages);
                 const messagesContainer = document.getElementById('messages');
                 messages.forEach(message => {
                     const messageElement = document.createElement('div');
                     messageElement.textContent = `${message.User.name}: ${message.message}`;
                     messagesContainer.appendChild(messageElement);
                 });
+                // 스크롤을 최하단으로 이동
+                messagesContainer.scrollTop = messagesContainer.scrollHeight;
             });
 
             socket.on('newMessage', (data) => {
@@ -85,37 +88,20 @@
                 const messageElement = document.createElement('div');
                 messageElement.textContent = `${data.user.name}: ${data.newMessage.message}`;
                 messages.appendChild(messageElement);
-            });
-
-            socket.on('userJoined', (data) => {
-                const messages = document.getElementById('messages');
-                const messageElement = document.createElement('div');
-                messageElement.textContent = `${data.user.name}님이 입장하셨습니다.`;
-                messageElement.style.color = 'green';
-                messages.appendChild(messageElement);
-            });
-
-            socket.on('updateUserList', (users) => {
-                const userList = document.getElementById('users');
-                const userCount = document.getElementById('user-list-count');
-
-                userList.innerHTML = '';
-                userCount.innerHTML = `현재: ${users.length}명`;
-
-                users.forEach(user => {
-                    const userElement = document.createElement('li');
-                    userElement.textContent = user.name;
-                    userList.appendChild(userElement);
-                });
+                // 새 메시지가 오면 스크롤을 최하단으로 이동
+                messages.scrollTop = messages.scrollHeight;
             });
 
             const sendButton = document.getElementById('sendButton');
             sendButton.addEventListener('click', () => {
                 const messageInput = document.getElementById('message');
                 const message = messageInput.value;
-                // 빈 입력은 전송하지 않음
                 if (message.trim()) {
-                    socket.emit('sendMessage', { message, type: 'public' });
+                    socket.emit('sendMessage', {
+                        message,
+                        type: 'private',
+                        targetId: +targetUserId
+                    });
                     messageInput.value = '';
                 }
             });
@@ -124,7 +110,11 @@
             const messageInput = document.getElementById('message');
             messageInput.addEventListener('keypress', (e) => {
                 if (e.key === 'Enter' && messageInput.value.trim()) {
-                    socket.emit('sendMessage', { message: messageInput.value, type: 'public' });
+                    socket.emit('sendMessage', {
+                        message: messageInput.value,
+                        type: 'private',
+                        targetId: +targetUserId
+                    });
                     messageInput.value = '';
                 }
             });

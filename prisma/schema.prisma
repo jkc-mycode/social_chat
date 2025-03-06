@@ -32,7 +32,7 @@ model Chat {
   message   String   @db.Text
   userId    Int      @map("user_id")
   partnerId Int?     @map("partner_id")
-  type      String   @default("MULTI")
+  type      String   @default("public")
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @updatedAt @map("updated_at")
   User      User     @relation(fields: [userId], references: [id])

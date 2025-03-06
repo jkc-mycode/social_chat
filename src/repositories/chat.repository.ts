@@ -15,18 +15,41 @@ export class ChatRepository {
   ): Promise<Chat[]> => {
     try {
       let messages = undefined;
-      if (partnerId) {
+      console.log('@@@@@@@@@@@@@@@@@@@');
+      console.log(type, userId, partnerId);
+      if (type === 'private' && partnerId) {
+        // private 채팅은 양방향 메시지를 모두 조회
         messages = await this.prisma.chat.findMany({
           include: { User: { select: { name: true } } },
-          where: { type, userId, partnerId },
+          where: {
+            type,
+            OR: [
+              { AND: [{ userId }, { partnerId }, { type: 'private' }] },
+              {
+                AND: [
+                  { userId: partnerId },
+                  { partnerId: userId },
+                  { type: 'private' },
+                ],
+              },
+            ],
+          },
+          orderBy: {
+            createdAt: 'asc',
+          },
         });
       } else {
+        // 공개 채팅은 type만으로 조회
         messages = await this.prisma.chat.findMany({
           include: { User: { select: { name: true } } },
-          where: { type },
+          where: { type: 'public' },
+          orderBy: {
+            createdAt: 'asc',
+          },
         });
       }
-
+      console.log('@@@@@@@@@@@@@@@@@@@');
+      console.log(messages);
       return messages;
     } catch (err: any) {
       throw new CustomError(err.message, err.statusCode);
@@ -37,11 +60,17 @@ export class ChatRepository {
   saveMessage = async (
     message: string,
     userId: number,
-    type: string
+    type: string,
+    targetId?: number
   ): Promise<Chat> => {
     try {
       const newMessage = await this.prisma.chat.create({
-        data: { message, userId, type },
+        data: {
+          message,
+          userId,
+          type,
+          partnerId: targetId,
+        },
       });
 
       return newMessage;

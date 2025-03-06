@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Users-Chat</title>
+    <link rel="stylesheet" href="/styles.css">
+    <script src="/socket.io/socket.io.js"></script>
+</head>
+
+<body>
+    <div class="header">
+        <a href="/chat"><button>Chat</button></a>
+        <a href="/chat/users"><button>Users</button></a>
+        <a href="#"><button onclick="logout()">Logout</button></a>
+    </div>
+    <div class="user-list-box">
+        <h3 id="user-list-count">현재: 0명</h3>
+        <div id="user-boxes">
+            <!-- 사용자 박스들이 여기에 추가됩니다 -->
+        </div>
+    </div>
+
+    <script>
+        // 로그아웃 버튼 클릭 시
+        function logout() {
+            fetch('/user/sign-out', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                }
+            }).then(res => {
+                if (res.ok) {
+                    window.location.href = '/user/sign-in';
+                } else {
+                    alert('로그아웃 실패!');
+                }
+            }).catch(err => {
+                console.error('Error:', err);
+                alert('로그아웃 실패!');
+            });
+        }
+
+        // 페이지 로딩 시
+        document.addEventListener('DOMContentLoaded', () => {
+            const socket = io('/chat');
+            let currentUserId; // 현재 로그인한 사용자의 ID 저장
+
+            socket.on('connect', () => {
+                console.log('Chat 네임스페이스 접속 완료');
+                // 서버에 현재 사용자 정보 요청
+                socket.emit('getCurrentUser');
+            });
+
+            socket.on('disconnect', () => {
+                console.log('Chat 네임스페이스 접속 해제');
+            });
+
+            // 현재 사용자 정보 수신
+            socket.on('currentUser', (user) => {
+                currentUserId = user.id;
+                // 사용자 정보를 받은 후에 사용자 목록을 요청
+                socket.emit('requestUserList');
+            });
+
+            // 사용자 목록 업데이트
+            socket.on('updateUserList', (users) => {
+                const userBoxesContainer = document.getElementById('user-boxes');
+                const userCount = document.getElementById('user-list-count');
+
+                userBoxesContainer.innerHTML = '';
+
+                // 자신을 제외한 사용자만 필터링
+                const filteredUsers = users.filter(user => user.id !== currentUserId);
+
+                // 사용자 수 업데이트 (자신을 제외한 수)
+                userCount.innerHTML = `현재: ${filteredUsers.length}명`;
+
+                filteredUsers.forEach(user => {
+                    const userBox = document.createElement('div');
+                    userBox.className = 'user-box';
+                    userBox.innerHTML = `<div class="user-name">${user.name}</div>`;
+
+                    // 사용자 박스 클릭 이벤트 추가
+                    userBox.addEventListener('click', () => {
+                        // 사용자 목록 업데이트 요청 후 페이지 이동
+                        socket.emit('requestUserList');
+                        window.location.href = `/chat/private/${user.id}`;
+                    });
+
+                    userBoxesContainer.appendChild(userBox);
+                });
+            });
+        });
+    </script>
+</body>
+
+</html>

@@ -11,13 +11,15 @@ export class ChatService {
   sendMessage = async (
     message: string,
     userId: number,
-    type: string
+    type: string,
+    targetId?: number
   ): Promise<Chat> => {
     try {
       const newMessage = await this.chatRepository.saveMessage(
         message,
         userId,
-        type
+        type,
+        targetId
       );
 
       return newMessage;

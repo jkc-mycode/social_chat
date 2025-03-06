@@ -16,6 +16,28 @@ router.get('/', isSignIn(true), (req, res) => {
   res.render('multi-chat');
 });
 
+// 유저 페이지 렌더링
+router.get('/users', isSignIn(true), (req, res) => {
+  res.render('users-chat');
+});
+
+// private 채팅 페이지 렌더링
+router.get('/private/:id', isSignIn(true), async (req, res) => {
+  try {
+    const targetUser = await prisma.user.findUnique({
+      where: { id: parseInt(req.params.id) },
+    });
+
+    if (!targetUser) {
+      return res.redirect('/chat/users');
+    }
+
+    res.render('private-chat', { targetUser });
+  } catch (error) {
+    res.redirect('/chat/users');
+  }
+});
+
 // 채팅 목록 조회 API
 router.get('/messages', isSignIn(true), chatController.getMessages);
 
