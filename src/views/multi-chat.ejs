@@ -18,22 +18,23 @@
     <div class="chat-container">
         <div class="message-and-input">
             <div class="messages" id="messages">
-                <!-- Messages will be displayed here -->
+                <!-- 메시지들 출력될 곳 -->
             </div>
             <div class="message-input">
-                <input type="text" id="message" placeholder="Type your message here...">
-                <button>Send</button>
+                <input type="text" id="message" placeholder="메시지를 입력해 주세요.">
+                <button id="sendButton">Send</button>
             </div>
         </div>
         <div class="user-list">
-            <h3>현재: </h3>
+            <h3 id="user-list-count">현재: 0명</h3>
             <ul id="users">
-                <!-- User list will be displayed here -->
+                <!-- 사용자 리스트 출력될 곳 -->
             </ul>
         </div>
     </div>
 
     <script>
+        // 로그아웃 버튼 클릭 시
         function logout() {
             fetch('/user/sign-out', {
                 method: 'POST',
@@ -52,29 +53,60 @@
             });
         }
 
+        // 페이지 로딩 시
         document.addEventListener('DOMContentLoaded', () => {
             const socket = io('/chat');
 
             socket.on('connect', () => {
-                console.log('Connected to chat namespace');
+                console.log('Chat 네임스페이스 접속 완료');
             });
 
             socket.on('disconnect', () => {
-                console.log('Disconnected from chat namespace');
+                console.log('Chat 네임스페이스 접속 해제');
             });
 
-            socket.on('newMessage', (message) => {
-                const message = document.getElementById('message');
+            socket.on('existingMessages', (messages) => {
+                const messagesContainer = document.getElementById('messages');
+                messages.forEach(message => {
+                    const messageElement = document.createElement('div');
+                    messageElement.textContent = `${message.User.name}: ${message.message}`;
+                    messagesContainer.appendChild(messageElement);
+                });
+            });
+
+            socket.on('newMessage', (data) => {
+                const messages = document.getElementById('messages');
                 const messageElement = document.createElement('div');
-                messageElement.textContent = message;
+                messageElement.textContent = `${data.user.name}: ${data.newMessage.message}`;
                 messages.appendChild(messageElement);
+            });
+
+            socket.on('userJoined', (data) => {
+                const messages = document.getElementById('messages');
+                const messageElement = document.createElement('div');
+                messageElement.textContent = `${data.user.name}님이 입장하셨습니다.`;
+                messageElement.style.color = 'green';
+                messages.appendChild(messageElement);
+            });
+
+            socket.on('updateUserList', (users) => {
+                const userList = document.getElementById('users');
+                const userCount = document.getElementById('user-list-count');
+
+                userList.innerHTML = '';
+                userCount.innerHTML = `현재: ${users.length}명`;
+                users.forEach(user => {
+                    const userElement = document.createElement('li');
+                    userElement.textContent = user.name;
+                    userList.appendChild(userElement);
+                });
             });
 
             const sendButton = document.getElementById('sendButton');
             sendButton.addEventListener('click', () => {
                 const messageInput = document.getElementById('message');
                 const message = messageInput.value;
-                socket.emit('sendMessage', message);
+                socket.emit('sendMessage', { message, type: 'public' });
                 messageInput.value = '';
             });
         });

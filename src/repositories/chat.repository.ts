@@ -17,10 +17,12 @@ export class ChatRepository {
       let messages = undefined;
       if (partnerId) {
         messages = await this.prisma.chat.findMany({
+          include: { User: { select: { name: true } } },
           where: { type, userId, partnerId },
         });
       } else {
         messages = await this.prisma.chat.findMany({
+          include: { User: { select: { name: true } } },
           where: { type },
         });
       }
