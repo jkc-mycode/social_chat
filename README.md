@@ -8,7 +8,7 @@
 - Database: MySQL 8.0
 - ORM: Prisma
 - 실시간 통신: Socket.IO
-- 인증: Passport.js, JWT
+- 인증: Passport.js
 - 컨테이너화: Docker, Docker Compose
 
 ## 시스템 요구사항
