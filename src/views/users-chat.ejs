@@ -80,11 +80,15 @@
                 filteredUsers.forEach(user => {
                     const userBox = document.createElement('div');
                     userBox.className = 'user-box';
-                    userBox.innerHTML = `<div class="user-name">${user.name}</div>`;
+                    userBox.innerHTML = `
+                        <div class="user-name">ID: ${user.name}</div>
+                        <div class="user-join-date">가입일: ${new Date(user.createdAt).toLocaleDateString()}</div>
+                        <button class="chat-button">DM</button>
+                    `;
 
-                    // 사용자 박스 클릭 이벤트 추가
-                    userBox.addEventListener('click', () => {
-                        // 사용자 목록 업데이트 요청 후 페이지 이동
+                    // 채팅 버튼에만 클릭 이벤트 추가
+                    const chatButton = userBox.querySelector('.chat-button');
+                    chatButton.addEventListener('click', () => {
                         socket.emit('requestUserList');
                         window.location.href = `/chat/private/${user.id}`;
                     });
