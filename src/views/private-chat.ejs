@@ -61,7 +61,6 @@
 
             socket.on('connect', () => {
                 console.log('Chat 네임스페이스 접속 완료');
-                console.log(targetUserId);
                 socket.emit('joinPage', 'private');
                 // private 메시지 목록 요청
                 socket.emit('requestMessages', { type: 'private', targetId: +targetUserId });
@@ -72,7 +71,6 @@
             });
 
             socket.on('existingMessages', (messages) => {
-                console.log(messages);
                 const messagesContainer = document.getElementById('messages');
                 messages.forEach(message => {
                     const messageElement = document.createElement('div');

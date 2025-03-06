@@ -15,8 +15,6 @@ export class ChatRepository {
   ): Promise<Chat[]> => {
     try {
       let messages = undefined;
-      console.log('@@@@@@@@@@@@@@@@@@@');
-      console.log(type, userId, partnerId);
       if (type === 'private' && partnerId) {
         // private 채팅은 양방향 메시지를 모두 조회
         messages = await this.prisma.chat.findMany({
@@ -48,8 +46,6 @@ export class ChatRepository {
           },
         });
       }
-      console.log('@@@@@@@@@@@@@@@@@@@');
-      console.log(messages);
       return messages;
     } catch (err: any) {
       throw new CustomError(err.message, err.statusCode);

@@ -46,7 +46,6 @@ export default (server: any, app: any, sessionMiddleware: any) => {
 
     // private 메시지 목록 요청 처리
     socket.on('requestMessages', async (data) => {
-      console.log('메시지 요청:', data);
       const messages = await chatRepository.getMessages(
         data.type,
         (socket.request as any).user.id,
