@@ -1,3 +1,4 @@
+<!-- 1:1 개인 채팅을 위한 채팅방 페이지 -->
 <!DOCTYPE html>
 <html lang="en">
 
@@ -11,11 +12,13 @@
 </head>
 
 <body>
+    <!-- 상단 네비게이션 메뉴 -->
     <div class="header">
         <a href="/chat"><button>Chat</button></a>
         <a href="/chat/users"><button>Users</button></a>
         <a href="#"><button onclick="logout()">Logout</button></a>
     </div>
+    <!-- 1:1 채팅 컨텐츠 영역 -->
     <div class="chat-content">
         <h2 class="chat-title">
             <%= targetUser.name %>님과의 대화
@@ -34,9 +37,10 @@
     </div>
 
     <script>
+        // 대화 상대방의 사용자 ID를 서버에서 전달받아 저장
         const targetUserId = '<%= targetUser.id %>';
 
-        // 로그아웃 버튼 클릭 시
+        // 로그아웃 처리 함수
         function logout() {
             fetch('/user/sign-out', {
                 method: 'POST',
@@ -55,14 +59,19 @@
             });
         }
 
-        // 페이지 로딩 시
+        // DOM 로드 완료 시 실행
         document.addEventListener('DOMContentLoaded', () => {
             const socket = io('/chat');
 
+            /**
+             * 소켓 연결 성공 시 실행되는 이벤트 핸들러
+             * - private 채팅방 참여 알림
+             * - 이전 1:1 대화 내용 요청
+             */
             socket.on('connect', () => {
                 console.log('Chat 네임스페이스 접속 완료');
                 socket.emit('joinPage', 'private');
-                // private 메시지 목록 요청
+                // 이전 1:1 대화 내용 요청
                 socket.emit('requestMessages', { type: 'private', targetId: +targetUserId });
             });
 
@@ -70,6 +79,10 @@
                 console.log('Chat 네임스페이스 접속 해제');
             });
 
+            /**
+             * 기존 채팅 메시지 표시 이벤트 핸들러
+             * - 채팅방 입장 시 이전 메시지들을 화면에 표시
+             */
             socket.on('existingMessages', (messages) => {
                 const messagesContainer = document.getElementById('messages');
                 messages.forEach(message => {
@@ -77,19 +90,24 @@
                     messageElement.textContent = `${message.User.name}: ${message.message}`;
                     messagesContainer.appendChild(messageElement);
                 });
-                // 스크롤을 최하단으로 이동
-                messagesContainer.scrollTop = messagesContainer.scrollHeight;
             });
 
+            /**
+             * 새 메시지 수신 이벤트 핸들러
+             * - 다른 사용자가 보낸 새 메시지를 실시간으로 화면에 표시
+             */
             socket.on('newMessage', (data) => {
                 const messages = document.getElementById('messages');
                 const messageElement = document.createElement('div');
                 messageElement.textContent = `${data.user.name}: ${data.newMessage.message}`;
                 messages.appendChild(messageElement);
-                // 새 메시지가 오면 스크롤을 최하단으로 이동
-                messages.scrollTop = messages.scrollHeight;
             });
 
+            /**
+             * 메시지 전송 버튼 클릭 이벤트 핸들러
+             * - 입력된 메시지를 서버로 전송
+             * - 빈 메시지는 전송하지 않음
+             */
             const sendButton = document.getElementById('sendButton');
             sendButton.addEventListener('click', () => {
                 const messageInput = document.getElementById('message');
