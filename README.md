@@ -97,7 +97,3 @@ npm run dev
    # Docker 컨테이너가 실행 중인 상태에서
    cat backup.sql | docker exec -i mysql_db mysql -u root -p123123 social_chat
    ```
-
-
-## 라이선스
-MIT License 
